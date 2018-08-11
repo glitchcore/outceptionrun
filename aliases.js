@@ -131,16 +131,31 @@ function hitTestRectangle(r1, r2) {
   return hit;
 };
 
-function local(point, C, n) {
-    return {
+function local(point, C, angles) {
+    let _point = {
         x: point.x - C.x,
         y: point.y - C.y,
         z: point.z - C.z
-    }
+    };
+
+    _point = {
+        x: _point.x * Math.cos(angles[0]) + _point.z * Math.sin(angles[0]),
+        y: _point.y,
+        z: -_point.x * Math.sin(angles[0]) + _point.z * Math.cos(angles[0])
+    };
+
+    _point = {
+        x: _point.x,
+        y: _point.y * Math.cos(angles[1]) + _point.z * Math.sin(angles[1]),
+        z: -_point.y * Math.sin(angles[1]) + _point.z * Math.cos(angles[1])
+    };
+
+    return _point;
 }
+
 // C is PoV, n is view vector
-function perspective_projection(point, alpha, C, n) {
-    let local_point = local(point, C, n);
+function perspective_projection(point, alpha, C, angles) {
+    let local_point = local(point, C, angles);
 
     let factor = Math.abs(alpha/local_point.z);
     return {
@@ -149,8 +164,8 @@ function perspective_projection(point, alpha, C, n) {
     };
 }
 
-function ortho_projection(point, C, n) {
-    let local_point = local(point, C, n);
+function ortho_projection(point, C, angles) {
+    let local_point = local(point, C, angles);
 
     return {
         x: local_point.x,

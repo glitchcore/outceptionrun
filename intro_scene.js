@@ -24,33 +24,37 @@ function Intro_scene(pixi) {
     {
         this.cube = new Cube(100, scene);
         this.objects.push(this.cube);
-
-        this.cube2 = new Cube(200, scene);
-        this.objects.push(this.cube2);
-
-        // this.cube2_points = new Array(this.cube_points);
-
         this.cube.points.forEach(point => this.points.push(point));
-        this.cube2.points.forEach(point => this.points.push(point));
-
         this.cube.edges.forEach(edge => this.edges.push(edge));
-        this.cube2.edges.forEach(edge => this.edges.push(edge));
 
-        this.cube2.x = 200;
-        this.cube2.y = 10;
-        this.cube2.z = 200;
+        this.hypercube = new Hypercube(100, scene);
+        this.objects.push(this.hypercube);
+        this.hypercube.points.forEach(point => this.points.push(point));
+        this.hypercube.edges.forEach(edge => this.edges.push(edge));
+
+        // this.cube2 = new Cube(200, scene);
+        // this.objects.push(this.cube2);
+        // this.cube2.points.forEach(point => this.points.push(point));
+        // this.cube2.edges.forEach(edge => this.edges.push(edge));
+
+        this.cube.x = 1000;
+        this.cube.y = 0;
+        this.cube.z = 0;
+        this.cube.u = 100;
     }
 
     this.pov = {
         x:0,
         y:0,
-        z:-1000
+        z:-1000,
+        u: -1000
     };
 
     this.pov_s = {
         x:0,
         y:0,
-        z:0
+        z:0,
+        u:0
     };
 
     this.view_angle = [0, 0];
@@ -71,12 +75,18 @@ function Intro_scene(pixi) {
         this.pov.z += this.pov_s.z;
         // this.alpha += this.pov_s.z;
 
-        // this.cube.x += 2;
+        // this.cube.u += 1;
         // this.cube.y += 0.01;
         // this.cube.z += 2;
-        this.cube.theta += 0.05;
+        // this.cube.phi += 0.01;
+        // this.cube.theta += 0.01;
+        // this.cube.sigma_0 += 0.1;
 
-        this.cube2.rho += 0.02;
+        this.hypercube.phi += 0.01;
+        this.hypercube.theta += 0.01;
+        this.hypercube.sigma_0 += 0.01;
+
+        // this.cube2.rho += 0.02;
 
         this.objects.forEach(object => {
             object.update();

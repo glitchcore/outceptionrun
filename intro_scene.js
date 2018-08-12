@@ -19,11 +19,14 @@ function Intro_scene(pixi) {
 
     this.points = [];
     this.edges = [];
+    this.objects = [];
 
     {
         this.cube = new Cube(100, scene);
+        this.objects.push(this.cube);
 
         this.cube2 = new Cube(200, scene);
+        this.objects.push(this.cube2);
 
         // this.cube2_points = new Array(this.cube_points);
 
@@ -71,9 +74,13 @@ function Intro_scene(pixi) {
         // this.cube.x += 2;
         // this.cube.y += 0.01;
         // this.cube.z += 2;
+        this.cube.theta += 0.05;
 
-        this.cube.update();
-        this.cube2.update();
+        this.cube2.rho += 0.02;
+
+        this.objects.forEach(object => {
+            object.update();
+        });
 
         this.points.forEach(point => {
             point.d2 = perspective_projection(point, this.alpha, this.pov, this.view_angle);

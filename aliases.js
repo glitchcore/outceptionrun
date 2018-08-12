@@ -131,6 +131,33 @@ function hitTestRectangle(r1, r2) {
   return hit;
 };
 
+// x axis
+function phi(p, a) {
+    return {
+        x: p.x * 1 + p.y * 0 + p.z * 0,
+        y: p.x * 0 + p.y * Math.cos(a) + p.z * -Math.sin(a),
+        z: p.x * 0 + p.y * Math.sin(a) + p.z * Math.cos(a)
+    }
+}
+
+// y axis
+function theta(p, a) {
+    return {
+        x: p.x * Math.cos(a) + p.y * 0 + p.z * Math.sin(a),
+        y: p.x * 0 + p.y * 1 + p.z * 0,
+        z: p.x * -Math.sin(a) + p.y * 0 + p.z * Math.cos(a)
+    };
+}
+
+// z axis
+function rho(p, a) {
+    return {
+        x: p.x * Math.cos(a) + p.y * -Math.sin(a) + p.z * 0,
+        y: p.x * Math.sin(a) + p.y * Math.cos(a) + p.z * 0,
+        z: p.x * 0 + p.y * 0 + p.z * 1
+    };
+}
+
 function local(point, C, angles) {
     let _point = {
         x: point.x - C.x,
@@ -138,19 +165,7 @@ function local(point, C, angles) {
         z: point.z - C.z
     };
 
-    _point = {
-        x: _point.x * Math.cos(angles[0]) + _point.z * Math.sin(angles[0]),
-        y: _point.y,
-        z: -_point.x * Math.sin(angles[0]) + _point.z * Math.cos(angles[0])
-    };
-
-    _point = {
-        x: _point.x,
-        y: _point.y * Math.cos(angles[1]) + _point.z * Math.sin(angles[1]),
-        z: -_point.y * Math.sin(angles[1]) + _point.z * Math.cos(angles[1])
-    };
-
-    return _point;
+    return phi(theta(_point, angles[0]), -angles[1])
 }
 
 // C is PoV, n is view vector
@@ -221,6 +236,10 @@ class Cube {
         this.y = 0;
         this.z = 0;
 
+        this.phi = 0;
+        this.theta = 0;
+        this.rho = 0;
+
         this.size = size;
 
         this.edges = [
@@ -253,9 +272,22 @@ class Cube {
         // console.log("this.points", this.points);
 
         this.raw_points.forEach((point, idx) => {
-            this.points[idx].x = point.x * this.size/2 + this.x;
-            this.points[idx].y = point.y * this.size/2 + this.y;
-            this.points[idx].z = point.z * this.size/2 + this.z;
+            let p1 = {
+                x: point.x * this.size/2,
+                y: point.y * this.size/2,
+                z: point.z * this.size/2
+            };
+
+            p1 = rho(
+                phi(
+                    theta(p1, this.theta),
+                    this.phi),
+                this.rho
+            );
+
+            this.points[idx].x = p1.x + this.x;
+            this.points[idx].y = p1.y + this.y;
+            this.points[idx].z = p1.z + this.z;
         });
     }
 }

@@ -21,108 +21,21 @@ function Intro_scene(pixi) {
     this.edges = [];
 
     {
-        this.cube_points = [
-            {x:-1, y:-1, z: -1},
-            {x:1, y:-1, z: -1},
-            {x:1, y:1, z: -1},
-            {x:-1, y:1, z: -1},
+        this.cube = new Cube(100, scene);
 
-            {x:-1, y:-1, z: 1},
-            {x:1, y:-1, z: 1},
-            {x:1, y:1, z: 1},
-            {x:-1, y:1, z: 1},
-        ];
-
-        this.cube2_points = [
-            {x:-1, y:-1, z: -1},
-            {x:1, y:-1, z: -1},
-            {x:1, y:1, z: -1},
-            {x:-1, y:1, z: -1},
-
-            {x:-1, y:-1, z: 1},
-            {x:1, y:-1, z: 1},
-            {x:1, y:1, z: 1},
-            {x:-1, y:1, z: 1},
-        ];
+        this.cube2 = new Cube(200, scene);
 
         // this.cube2_points = new Array(this.cube_points);
 
-        this.cube_points.forEach(point => this.points.push(point));
-        this.cube2_points.forEach(point => this.points.push(point));
+        this.cube.points.forEach(point => this.points.push(point));
+        this.cube2.points.forEach(point => this.points.push(point));
 
-        this.cube_points.forEach(point => {
-            point.x *= 100;
-            point.y *= 100;
-            point.z *= 100;
-        });
-        this.cube2_points.forEach(point => {
-            point.x *= 100;
-            point.y *= 100;
-            point.z *= 100;
-        });
+        this.cube.edges.forEach(edge => this.edges.push(edge));
+        this.cube2.edges.forEach(edge => this.edges.push(edge));
 
-        this.cube_points.forEach(point => {
-            point.x += 0;
-            point.y += 0;
-            point.z += 0;
-        });
-        this.cube2_points.forEach(point => {
-            point.x += 200;
-            point.y += 10;
-            point.z += 200;
-        });
-
-        
-
-        [
-            [0,1],
-            [1,2],
-            [2,3],
-            [3,0],
-
-            [4,5],
-            [5,6],
-            [6,7],
-            [7,4],
-
-            [0,4],
-            [1,5],
-            [2,6],
-            [3,7],
-        ].forEach(item => {
-            let ab = new Line([
-                this.cube_points[item[0]],
-                this.cube_points[item[1]]
-            ], 5, 0xffffaa);
-
-            this.edges.push(ab);
-            scene.addChild(ab);
-        });
-
-        [
-            [0,1],
-            [1,2],
-            [2,3],
-            [3,0],
-
-            [4,5],
-            [5,6],
-            [6,7],
-            [7,4],
-
-            [0,4],
-            [1,5],
-            [2,6],
-            [3,7],
-        ].forEach(item => {
-            let ab = new Line([
-                this.cube2_points[item[0]],
-                this.cube2_points[item[1]]
-            ], 5, 0xffffaa);
-
-            this.edges.push(ab);
-            scene.addChild(ab);
-        });
+        this.cube2.x = 200;
+        this.cube2.y = 10;
+        this.cube2.z = 200;
     }
 
     this.pov = {
@@ -131,24 +44,39 @@ function Intro_scene(pixi) {
         z:-1000
     };
 
+    this.pov_s = {
+        x:0,
+        y:0,
+        z:0
+    };
+
     this.view_angle = [0, 0];
+    this.view_angle_s = [0, 0];
+    this.alpha = 2000;
 
     scene.update = (delta, now) => {
-        const alpha = 2000;
+        let mouse = pixi.renderer.plugins.interaction.mouse.getLocalPosition(scene);
 
-        // this.view_angle[0] = Math.cos(now/1000) * 0.2;
+        // this.view_angle[0] += this.view_angle_s[0];
+        // this.view_angle[1] += this.view_angle_s[1];
 
-        this.cube_points.forEach(point => {
-            // point.x += 2;
-            // point.y += 0.01;
-            // point.z += 2;
-        });
+        this.view_angle[0] = mouse.x/1000 - 0.5;
+        this.view_angle[1] = mouse.y/1000 - 0.5;
 
-        // console.log(Math.floor(now) % 2);
-        // this.b.y = Math.sin(now/100) * 100;
+        this.pov.x += this.pov_s.x;
+        this.pov.y += this.pov_s.y;
+        this.pov.z += this.pov_s.z;
+        // this.alpha += this.pov_s.z;
+
+        // this.cube.x += 2;
+        // this.cube.y += 0.01;
+        // this.cube.z += 2;
+
+        this.cube.update();
+        this.cube2.update();
 
         this.points.forEach(point => {
-            point.d2 = perspective_projection(point, alpha, this.pov, this.view_angle);
+            point.d2 = perspective_projection(point, this.alpha, this.pov, this.view_angle);
             // point.d2 = ortho_projection(point, pov, null);
         });
 
@@ -160,25 +88,29 @@ function Intro_scene(pixi) {
         });
     };
 
+    const POV_SPEED = 5;
+
     scene.key_handler = (key, isPress) => {
-        // console.log("key handler");
+        if(isPress && key === 39) {
+            // this.view_angle_s[0] = 0.05;
+            this.pov_s.x = POV_SPEED;
+        }
+        if(isPress && key === 37) {
+            // this.view_angle_s[0] = -0.05;
+            this.pov_s.x = -POV_SPEED;
+        }
+        if(!isPress && (key === 37 || key === 39)) {
+            this.pov_s.x = 0;
+        }
 
-        if(isPress === true) {
-            if(isPress && key === 39) {
-                this.view_angle[0] += 0.1;
-            }
-
-            if(isPress && key === 37) {
-                this.view_angle[0] -= 0.1;
-            }
-
-            if(isPress && key === 38) {
-                this.view_angle[1] += 0.1;
-            }
-
-            if(isPress && key === 40) {
-                this.view_angle[1] -= 0.1;
-            }
+        if(isPress && key === 38) {
+            this.pov_s.z = POV_SPEED;
+        }
+        if(isPress && key === 40) {
+            this.pov_s.z = -POV_SPEED;
+        }
+        if(!isPress && (key === 38 || key === 40)) {
+            this.pov_s.z = 0;
         }
     };
 

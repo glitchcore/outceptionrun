@@ -198,3 +198,64 @@ class Line extends PIXI.Graphics {
         this.lineTo(p[2], p[3]);
     }
 }
+
+class Cube {
+    constructor(size, scene) {
+        this.raw_points = [
+            {x:-1, y:-1, z: -1},
+            {x:1, y:-1, z: -1},
+            {x:1, y:1, z: -1},
+            {x:-1, y:1, z: -1},
+
+            {x:-1, y:-1, z: 1},
+            {x:1, y:-1, z: 1},
+            {x:1, y:1, z: 1},
+            {x:-1, y:1, z: 1},
+        ];
+
+        this.points = this.raw_points.map(x => ({x:0, y:0, z:0}));
+
+        this.edges = [];
+
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
+
+        this.size = size;
+
+        this.edges = [
+            [0,1],
+            [1,2],
+            [2,3],
+            [3,0],
+
+            [4,5],
+            [5,6],
+            [6,7],
+            [7,4],
+
+            [0,4],
+            [1,5],
+            [2,6],
+            [3,7],
+        ].map(item => {
+            let ab = new Line([
+                this.points[item[0]],
+                this.points[item[1]]
+            ], 5, 0xffffaa);
+
+            scene.addChild(ab);
+            return ab;
+        });
+    }
+
+    update() {
+        // console.log("this.points", this.points);
+
+        this.raw_points.forEach((point, idx) => {
+            this.points[idx].x = point.x * this.size/2 + this.x;
+            this.points[idx].y = point.y * this.size/2 + this.y;
+            this.points[idx].z = point.z * this.size/2 + this.z;
+        });
+    }
+}

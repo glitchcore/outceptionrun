@@ -181,10 +181,10 @@ function sigma_b(p, a) {
 
 function sigma_c(p, a) {
     return {
-        x: p.x * 1 + p.y * 0 + p.z * 0,
-        y: p.x * 0 + p.y * 1 + p.z * 0,
-        z: p.x * 0 + p.y * Math.sin(a) + p.z * Math.cos(a),
-        u: p.x * 0 + p.y * 0 + p.z * Math.cos(a) + p.u * Math.sin(a),
+        x: p.x * 1 + p.y * 0 + p.z * 0 + p.u * 0,
+        y: p.x * 0 + p.y * Math.cos(a) + p.z * -Math.sin(a) + p.u *0,
+        z: p.x * 0 + p.y * Math.sin(a) + p.z * Math.cos(a) + p.u * 0,
+        u: p.x * 0 + p.y * 0 + p.z * 0 + p.u * 1,
     };
 }
 
@@ -200,7 +200,7 @@ function local(point, C, angles) {
 }
 
 // C is PoV, n is view vector
-function perspective_projection(point, alpha, C, angles) {
+function perspective_projection(point, alpha, alpha_u, C, angles) {
     let local_point = local(point, C, angles);
 
     let d3_factor = Math.abs(alpha/local_point.u);
@@ -213,7 +213,7 @@ function perspective_projection(point, alpha, C, angles) {
         z: d3_factor * local_point.z
     };
 
-    let factor = Math.abs(alpha/d3.z);
+    let factor = Math.abs(alpha_u/d3.z);
     return {
         x: factor * d3.x,
         y: factor * d3.y
@@ -256,7 +256,7 @@ class Line extends PIXI.Graphics {
 }
 
 class Cube {
-    constructor(size, scene) {
+    constructor(size, scenes) {
         this.raw_points = [
             {x:-1, y:-1, z: -1, u: 0},
             {x:1, y:-1, z: -1, u: 0},
@@ -304,13 +304,14 @@ class Cube {
             [2,6],
             [3,7],
         ].map(item => {
-            let ab = new Line([
-                this.points[item[0]],
-                this.points[item[1]]
-            ], 5, 0xffffaa);
-
-            scene.addChild(ab);
-            return ab;
+            return scenes.map(scene => {
+                let ab = new Line([
+                    this.points[item[0]],
+                    this.points[item[1]]
+                ], 5, 0xffffaa);
+                scene.addChild(ab);
+                return ab;
+            });
         });
     }
 
@@ -345,7 +346,7 @@ class Cube {
 }
 
 class Hypercube {
-    constructor(size, scene) {
+    constructor(size, scenes) {
         this.raw_points = [
             {x:-1, y:-1, z: -1, u: -1},
             {x:1, y:-1, z: -1, u: -1},
@@ -428,13 +429,14 @@ class Hypercube {
             [6 + 0,6 + 8],
             [7 + 0,7 + 8],
         ].map(item => {
-            let ab = new Line([
-                this.points[item[0]],
-                this.points[item[1]]
-            ], 5, 0xffffaa);
-
-            scene.addChild(ab);
-            return ab;
+            return scenes.map(scene => {
+                let ab = new Line([
+                    this.points[item[0]],
+                    this.points[item[1]]
+                ], 2, 0xffffaa);
+                scene.addChild(ab);
+                return ab;
+            });
         });
     }
 

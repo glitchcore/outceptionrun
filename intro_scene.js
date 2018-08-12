@@ -10,6 +10,32 @@ function Intro_scene(pixi) {
 
     scene.addChild(background);
 
+    let left_eye = new Container();
+    let right_eye = new Container();
+
+    
+    // right_eye.width = 1;
+
+    
+
+    scene.addChild(left_eye);
+    scene.addChild(right_eye);
+    left_eye.mask = new Graphics().drawRect(pixi.screen.width/2 - 205,300, 200, 200);
+    right_eye.mask =  new Graphics().drawRect(pixi.screen.width/2,300, 200, 200);
+
+    // 
+    // right_eye.filterArea = new PIXI.Rectangle(0,0,100,100);
+
+    // let eyes = [right_eye];
+    let eyes = [left_eye, right_eye];
+    eyes.forEach(item => {
+        let eye_background = new Graphics()
+        .beginFill(0x010101)
+        .drawRect(0, 0, pixi.screen.width, pixi.screen.height)
+        .endFill();
+
+        item.addChild(eye_background);
+    });
 
     {
         let message = new Text("OUTCEPTION RUN", DARK_STYLE_H1);
@@ -22,12 +48,12 @@ function Intro_scene(pixi) {
     this.objects = [];
 
     {
-        this.cube = new Cube(100, scene);
+        this.cube = new Cube(100, eyes);
         this.objects.push(this.cube);
         this.cube.points.forEach(point => this.points.push(point));
         this.cube.edges.forEach(edge => this.edges.push(edge));
 
-        this.hypercube = new Hypercube(100, scene);
+        this.hypercube = new Hypercube(100, eyes);
         this.objects.push(this.hypercube);
         this.hypercube.points.forEach(point => this.points.push(point));
         this.hypercube.edges.forEach(edge => this.edges.push(edge));
@@ -41,13 +67,18 @@ function Intro_scene(pixi) {
         this.cube.y = 0;
         this.cube.z = 0;
         this.cube.u = 100;
+
+        this.hypercube.x = 10;
     }
+
+    this.eye_diff = -85;
+    this.eye_a_diff = 105;
 
     this.pov = {
         x:0,
         y:0,
         z:-1000,
-        u: -1000
+        u: 0
     };
 
     this.pov_s = {
@@ -59,7 +90,7 @@ function Intro_scene(pixi) {
 
     this.view_angle = [0, 0];
     this.view_angle_s = [0, 0];
-    this.alpha = 2000;
+    this.alpha = 800;
 
     scene.update = (delta, now) => {
         let mouse = pixi.renderer.plugins.interaction.mouse.getLocalPosition(scene);
@@ -73,6 +104,10 @@ function Intro_scene(pixi) {
         this.pov.x += this.pov_s.x;
         this.pov.y += this.pov_s.y;
         this.pov.z += this.pov_s.z;
+
+        // this.eye_a_diff += this.pov_s.x;
+        // this.eye_diff += this.pov_s.z;
+
         // this.alpha += this.pov_s.z;
 
         // this.cube.u += 1;
@@ -82,9 +117,12 @@ function Intro_scene(pixi) {
         // this.cube.theta += 0.01;
         // this.cube.sigma_0 += 0.1;
 
-        this.hypercube.phi += 0.01;
-        this.hypercube.theta += 0.01;
-        this.hypercube.sigma_0 += 0.01;
+        this.hypercube.theta += 0.015;
+        // this.hypercube.u += 1;
+        this.hypercube.theta += 0.005;
+        this.hypercube.rho += 0.01;
+        this.hypercube.sigma_2 += 0.018;
+        this.hypercube.sigma_0 += 0.0096;
 
         // this.cube2.rho += 0.02;
 
@@ -93,21 +131,53 @@ function Intro_scene(pixi) {
         });
 
         this.points.forEach(point => {
-            point.d2 = perspective_projection(point, this.alpha, this.pov, this.view_angle);
+            point.d2 = [
+                perspective_projection(point, this.alpha, this.alpha,
+                    {
+                        x: this.pov.x + this.eye_diff,
+                        y: this.pov.y,
+                        z: this.pov.z,
+                        u: this.pov.u
+                    },
+                    [
+                        this.view_angle[0] - this.eye_a_diff/1000,
+                        this.view_angle[1],
+                    ]
+
+                ),
+                perspective_projection(point, this.alpha, this.alpha,
+                    {
+                        x: this.pov.x - this.eye_diff,
+                        y: this.pov.y,
+                        z: this.pov.z,
+                        u: this.pov.u
+                    },
+                    [
+                        this.view_angle[0] + this.eye_a_diff/1000,
+                        this.view_angle[1],
+                    ]
+                )
+            ];
             // point.d2 = ortho_projection(point, pov, null);
         });
 
         this.edges.forEach(edge => {
-            edge.update([
-                edge.points[0].d2.x + pixi.screen.width/2, edge.points[0].d2.y + pixi.screen.height/2,
-                edge.points[1].d2.x + pixi.screen.width/2, edge.points[1].d2.y + pixi.screen.height/2,
-            ]);
+            edge.forEach((eye_edge, idx) => {
+                eye_edge.update([
+                    eye_edge.points[0].d2[idx].x + pixi.screen.width/2, eye_edge.points[0].d2[idx].y + pixi.screen.height/2,
+                    eye_edge.points[1].d2[idx].x + pixi.screen.width/2, eye_edge.points[1].d2[idx].y + pixi.screen.height/2,
+                ]);
+            });
         });
+
+        left_eye.position.x = -200;
     };
 
     const POV_SPEED = 5;
 
     scene.key_handler = (key, isPress) => {
+        console.log("angle", this.eye_a_diff, "diff", this.eye_diff);
+
         if(isPress && key === 39) {
             // this.view_angle_s[0] = 0.05;
             this.pov_s.x = POV_SPEED;

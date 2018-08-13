@@ -11,23 +11,17 @@ function Intro_scene(pixi) {
     scene.addChild(background);
 
     let left_eye = new Container();
-    let right_eye = new Container();
+    // let right_eye = new Container();
 
-    
-    // right_eye.width = 1;
-
-    
+    // let eyes = [left_eye, right_eye];
+    let eyes = [left_eye];
 
     scene.addChild(left_eye);
-    scene.addChild(right_eye);
-    left_eye.mask = new Graphics().drawRect(pixi.screen.width/2 - 205,300, 200, 200);
-    right_eye.mask =  new Graphics().drawRect(pixi.screen.width/2,300, 200, 200);
+    // scene.addChild(right_eye);
 
-    // 
-    // right_eye.filterArea = new PIXI.Rectangle(0,0,100,100);
+    // left_eye.mask = new Graphics().drawRect(pixi.screen.width/2 - 205,300, 200, 200);
+    // right_eye.mask =  new Graphics().drawRect(pixi.screen.width/2,300, 200, 200);
 
-    // let eyes = [right_eye];
-    let eyes = [left_eye, right_eye];
     eyes.forEach(item => {
         let eye_background = new Graphics()
         .beginFill(0x010101)
@@ -48,10 +42,17 @@ function Intro_scene(pixi) {
     this.objects = [];
 
     {
+        /*
         this.cube = new Cube(100, eyes);
         this.objects.push(this.cube);
         this.cube.points.forEach(point => this.points.push(point));
         this.cube.edges.forEach(edge => this.edges.push(edge));
+
+        this.cube.x = 1000;
+        this.cube.y = 0;
+        this.cube.z = 0;
+        this.cube.u = 100;
+        */
 
         this.hypercube = new Hypercube(100, eyes);
         this.objects.push(this.hypercube);
@@ -63,12 +64,7 @@ function Intro_scene(pixi) {
         // this.cube2.points.forEach(point => this.points.push(point));
         // this.cube2.edges.forEach(edge => this.edges.push(edge));
 
-        this.cube.x = 1000;
-        this.cube.y = 0;
-        this.cube.z = 0;
-        this.cube.u = 100;
-
-        this.hypercube.x = 10;
+        this.hypercube.x = -100;
     }
 
     this.eye_diff = -85;
@@ -77,7 +73,7 @@ function Intro_scene(pixi) {
     this.pov = {
         x:0,
         y:0,
-        z:-1000,
+        z:-300,
         u: 0
     };
 
@@ -98,31 +94,32 @@ function Intro_scene(pixi) {
         // this.view_angle[0] += this.view_angle_s[0];
         // this.view_angle[1] += this.view_angle_s[1];
 
-        this.view_angle[0] = mouse.x/1000 - 0.5;
-        this.view_angle[1] = mouse.y/1000 - 0.5;
+        this.view_angle[0] = 0.1; // mouse.x/1000 - 0.5;
+        this.view_angle[1] = 0.05; // mouse.y/1000 - 0.5;
 
-        this.pov.x += this.pov_s.x;
-        this.pov.y += this.pov_s.y;
-        this.pov.z += this.pov_s.z;
+        // this.pov.x += this.pov_s.x;
+        // this.pov.y += this.pov_s.y;
+        // this.pov.z += this.pov_s.z;
 
         // this.eye_a_diff += this.pov_s.x;
         // this.eye_diff += this.pov_s.z;
 
         // this.alpha += this.pov_s.z;
 
-        // this.cube.u += 1;
+        // this.cube.u += 
         // this.cube.y += 0.01;
         // this.cube.z += 2;
         // this.cube.phi += 0.01;
         // this.cube.theta += 0.01;
         // this.cube.sigma_0 += 0.1;
 
-        this.hypercube.theta += 0.015;
-        // this.hypercube.u += 1;
-        this.hypercube.theta += 0.005;
-        this.hypercube.rho += 0.01;
-        this.hypercube.sigma_2 += 0.018;
-        this.hypercube.sigma_0 += 0.0096;
+        this.hypercube.phi = mouse.y/200 - 0.5;
+        // this.hypercube.u += this.pov_s.x;
+        this.hypercube.theta = mouse.x/200 - 0.5;
+        // this.hypercube.rho += 0.01;
+        
+        this.hypercube.sigma_2 += this.pov_s.x / 100;
+        this.hypercube.sigma_0 += this.pov_s.z / 100;
 
         // this.cube2.rho += 0.02;
 
@@ -170,7 +167,7 @@ function Intro_scene(pixi) {
             });
         });
 
-        left_eye.position.x = -200;
+        // left_eye.position.x = -400;
     };
 
     const POV_SPEED = 5;

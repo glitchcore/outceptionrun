@@ -433,7 +433,7 @@ class Hypercube {
                 let ab = new Line([
                     this.points[item[0]],
                     this.points[item[1]]
-                ], 2, 0xffffaa);
+                ], 2, 0xff9999);
                 scene.addChild(ab);
                 return ab;
             });
